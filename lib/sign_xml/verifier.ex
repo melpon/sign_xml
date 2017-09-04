@@ -234,12 +234,12 @@ defmodule SignXML.Verifier do
   end
 
   require Record
-  Record.defrecord :otpCertificate, Record.extract(:"OTPCertificate", from_lib: "public_key/include/public_key.hrl")
-  Record.defrecord :otpTBSCertificate, Record.extract(:"OTPTBSCertificate", from_lib: "public_key/include/public_key.hrl")
-  Record.defrecord :rsaPublicKey, Record.extract(:"RSAPublicKey", from_lib: "public_key/include/public_key.hrl")
-  Record.defrecord :otpSubjectPublicKeyInfo, Record.extract(:"OTPSubjectPublicKeyInfo", from_lib: "public_key/include/public_key.hrl")
-  Record.defrecord :publicKeyAlgorithm, Record.extract(:"PublicKeyAlgorithm", from_lib: "public_key/include/public_key.hrl")
-  Record.defrecord :dssSigValue, Record.extract(:"Dss-Sig-Value", from_lib: "public_key/include/public_key.hrl")
+  Record.defrecordp :otpCertificate, Record.extract(:"OTPCertificate", from_lib: "public_key/include/public_key.hrl")
+  Record.defrecordp :otpTBSCertificate, Record.extract(:"OTPTBSCertificate", from_lib: "public_key/include/public_key.hrl")
+  Record.defrecordp :rsaPublicKey, Record.extract(:"RSAPublicKey", from_lib: "public_key/include/public_key.hrl")
+  Record.defrecordp :otpSubjectPublicKeyInfo, Record.extract(:"OTPSubjectPublicKeyInfo", from_lib: "public_key/include/public_key.hrl")
+  Record.defrecordp :publicKeyAlgorithm, Record.extract(:"PublicKeyAlgorithm", from_lib: "public_key/include/public_key.hrl")
+  Record.defrecordp :dssSigValue, Record.extract(:"Dss-Sig-Value", from_lib: "public_key/include/public_key.hrl")
 
   defp get_public_key(der_certs, opts) do
     der_cert = List.last(der_certs)
