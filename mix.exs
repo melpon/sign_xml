@@ -4,7 +4,7 @@ defmodule SignXML.Mixfile do
   def project do
     [
       app: :sign_xml,
-      version: "1.0.0",
+      version: "1.0.3",
       elixir: "~> 1.4",
       description: "An implementation of the W3C XML Signature standard in Elixir",
       package: [maintainers: ["melpon"],
