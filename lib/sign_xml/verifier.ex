@@ -244,9 +244,15 @@ defmodule SignXML.Verifier do
   defp get_public_key(der_certs, opts) do
     der_cert = List.last(der_certs)
 
-    default_ca_pem_file = Application.app_dir(:sign_xml, "priv/cacert.pem")
-    ca_pem_file = Keyword.get(opts, :ca_pem_file, default_ca_pem_file)
-    [{_, trusted_cert, _} | _] = :public_key.pem_decode(File.read!(ca_pem_file))
+    trusted_cert =
+      case Keyword.fetch(opts, :ca_pem_file) do
+        {:ok, ca_pem_file} ->
+          [{_, trusted_cert, _} | _] = :public_key.pem_decode(File.read!(ca_pem_file))
+          trusted_cert
+        :error ->
+          [trusted_cert | _] = :certifi.cacerts()
+          trusted_cert
+      end
     {:ok, {_public_key_info, _policy_tree}} = :public_key.pkix_path_validation(trusted_cert, der_certs, [])
 
     otp = :public_key.pkix_decode_cert(der_cert, :otp)

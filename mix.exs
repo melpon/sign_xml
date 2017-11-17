@@ -24,6 +24,7 @@ defmodule SignXML.Mixfile do
   defp deps do
     [
       {:libxml, "~> 1.0"},
+      {:certifi, "~> 2.0"},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
     ]
   end
