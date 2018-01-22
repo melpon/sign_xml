@@ -86,16 +86,27 @@ defmodule SignXML.Verifier do
     end
   end
 
+  defp is_c14n_algorithm("http://www.w3.org/TR/2001/REC-xml-c14n-20010315"), do: true
+  defp is_c14n_algorithm("http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"), do: true
+  defp is_c14n_algorithm("http://www.w3.org/2001/10/xml-exc-c14n#"), do: true
+  defp is_c14n_algorithm("http://www.w3.org/2001/10/xml-exc-c14n#WithComments"), do: true
+  defp is_c14n_algorithm("http://www.w3.org/2006/12/xml-c14n11"), do: true
+  defp is_c14n_algorithm("http://www.w3.org/2006/12/xml-c14n11#WithComments"), do: true
+  defp is_c14n_algorithm(_), do: false
+
   defp apply_c14n(payload, algorithm, inclusive_ns_prefixes) do
-    case algorithm do
-      "http://www.w3.org/TR/2001/REC-xml-c14n-20010315"              -> SignXML.C14N.c14n(payload, :c14n_1_0, inclusive_ns_prefixes, false)
-      "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments" -> SignXML.C14N.c14n(payload, :c14n_1_0, inclusive_ns_prefixes, true)
-      "http://www.w3.org/2001/10/xml-exc-c14n#"             -> SignXML.C14N.c14n(payload, :c14n_exclusive_1_0, inclusive_ns_prefixes, false)
-      "http://www.w3.org/2001/10/xml-exc-c14n#WithComments" -> SignXML.C14N.c14n(payload, :c14n_exclusive_1_0, inclusive_ns_prefixes, true)
-      "http://www.w3.org/2006/12/xml-c14n11"              -> SignXML.C14N.c14n(payload, :c14n_1_1, inclusive_ns_prefixes, false)
-      "http://www.w3.org/2006/12/xml-c14n11#WithComments" -> SignXML.C14N.c14n(payload, :c14n_1_1, inclusive_ns_prefixes, true)
-      _ -> payload
-    end
+    result =
+      case algorithm do
+        "http://www.w3.org/TR/2001/REC-xml-c14n-20010315"              -> SignXML.C14N.c14n(payload, :c14n_1_0, inclusive_ns_prefixes, false)
+        "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments" -> SignXML.C14N.c14n(payload, :c14n_1_0, inclusive_ns_prefixes, true)
+        "http://www.w3.org/2001/10/xml-exc-c14n#"             -> SignXML.C14N.c14n(payload, :c14n_exclusive_1_0, inclusive_ns_prefixes, false)
+        "http://www.w3.org/2001/10/xml-exc-c14n#WithComments" -> SignXML.C14N.c14n(payload, :c14n_exclusive_1_0, inclusive_ns_prefixes, true)
+        "http://www.w3.org/2006/12/xml-c14n11"              -> SignXML.C14N.c14n(payload, :c14n_1_1, inclusive_ns_prefixes, false)
+        "http://www.w3.org/2006/12/xml-c14n11#WithComments" -> SignXML.C14N.c14n(payload, :c14n_1_1, inclusive_ns_prefixes, true)
+        _ -> raise "Invalid algorithm: #{algorithm}"
+      end
+    # remove xmlns=""
+    String.replace(result, " xmlns=\"\"", "")
   end
 
 
@@ -155,9 +166,14 @@ defmodule SignXML.Verifier do
             end
 
             algorithm = transform
-                        |> find_single_node("@Algorithm")
-                        |> get_attribute_value()
-            apply_c14n(payload, algorithm, inclusive_ns_prefixes)
+                        |> find_all_node("@Algorithm")
+                        |> Enum.map(&get_attribute_value/1)
+                        |> Enum.find(&is_c14n_algorithm/1)
+            if algorithm != nil do
+              apply_c14n(payload, algorithm, inclusive_ns_prefixes)
+            else
+              payload
+            end
           end)
 
         if is_binary(payload) do
