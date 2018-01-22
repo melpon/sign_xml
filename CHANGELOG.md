@@ -1,6 +1,6 @@
 # Changelog
 
-## x.y.z
+## 1.0.5
 
 - apply elixir formatter
 - update dependencies
