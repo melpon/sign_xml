@@ -7,10 +7,12 @@ defmodule SignXML.Mixfile do
       version: "1.0.4",
       elixir: "~> 1.4",
       description: "An implementation of the W3C XML Signature standard in Elixir",
-      package: [maintainers: ["melpon"],
-                licenses: ["MIT"],
-                links: %{"GitHub" => "https://github.com/melpon/sign_xml"}],
-      start_permanent: Mix.env == :prod,
+      package: [
+        maintainers: ["melpon"],
+        licenses: ["MIT"],
+        links: %{"GitHub" => "https://github.com/melpon/sign_xml"}
+      ],
+      start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
   end
@@ -25,7 +27,7 @@ defmodule SignXML.Mixfile do
     [
       {:libxml, "~> 1.0"},
       {:certifi, "~> 2.0"},
-      {:ex_doc, "~> 0.18.1", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.18.1", only: :dev, runtime: false}
     ]
   end
 end

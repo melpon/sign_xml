@@ -5,8 +5,9 @@ defmodule SignXML.C14N do
     try do
       if node.prev == nil && node.next == nil do
         root = Libxml.doc_get_root_element(base_doc)
+
         if root == node do
-          throw base_doc
+          throw(base_doc)
         end
       end
     catch
@@ -22,19 +23,11 @@ defmodule SignXML.C14N do
     copy_parent_namespaces(node, new_root)
 
     new_root = Libxml.Node.extract(new_root)
-    new_root = %{new_root |
-      children: node.children,
-      last: node.last,
-      next: nil,
-      prev: nil,
-    }
+    new_root = %{new_root | children: node.children, last: node.last, next: nil, prev: nil}
     :ok = Libxml.Node.apply(new_root)
 
     doc = Libxml.Node.extract(doc)
-    doc = %{doc |
-      private: node.pointer,
-      children: new_root
-    }
+    doc = %{doc | private: node.pointer, children: new_root}
     :ok = Libxml.Node.apply(doc)
 
     new_root = Libxml.Node.extract(new_root)
@@ -55,10 +48,7 @@ defmodule SignXML.C14N do
       set_parent(root.children, parent)
 
       # prevent recursive removal of children
-      root = %{root |
-        children: nil,
-        last: nil,
-      }
+      root = %{root | children: nil, last: nil}
       Libxml.Node.apply(root)
       Libxml.free_doc(doc)
     end
@@ -67,6 +57,7 @@ defmodule SignXML.C14N do
   defp set_parent(nil, _) do
     :ok
   end
+
   defp set_parent(%Libxml.Node{} = child, new_root) do
     child = Libxml.Node.extract(child)
     child = %{child | parent: new_root}
@@ -77,6 +68,7 @@ defmodule SignXML.C14N do
   defp cpn_2(nil, _to_node) do
     :ok
   end
+
   defp cpn_2(new_ns, to_node) do
     new_ns = Libxml.Ns.extract(new_ns)
     href = new_ns.href && Libxml.Char.extract(new_ns.href)
@@ -87,12 +79,22 @@ defmodule SignXML.C14N do
     rescue
       _ -> :ok
     end
+
     cpn_2(new_ns.next, to_node)
   end
 
   defp cpn_1(parent, to_node) do
     parent = parent && Libxml.Node.extract(parent)
-    if parent != nil && parent.type in [:element_node, :comment_node, :entity_ref_node, :pi_node, :xinclude_start, :xinclude_end] do
+
+    if parent != nil &&
+         parent.type in [
+           :element_node,
+           :comment_node,
+           :entity_ref_node,
+           :pi_node,
+           :xinclude_start,
+           :xinclude_end
+         ] do
       new_ns = parent.more.ns_def
       cpn_2(new_ns, to_node)
       cpn_1(parent.parent, to_node)
@@ -108,11 +110,13 @@ defmodule SignXML.C14N do
 
   def c14n(node, mode, inclusive_ns_prefixes, with_comments) do
     node = Libxml.Node.extract(node)
-    doc = if node.type == :document_node do
-      node
-    else
-      plain_fake_root_doc(node.doc, node)
-    end
+
+    doc =
+      if node.type == :document_node do
+        node
+      else
+        plain_fake_root_doc(node.doc, node)
+      end
 
     try do
       Libxml.C14N.doc_dump_memory(doc, nil, mode, inclusive_ns_prefixes, with_comments)
