@@ -4,7 +4,7 @@ defmodule SignXML.Mixfile do
   def project do
     [
       app: :sign_xml,
-      version: "1.0.5",
+      version: "1.0.6",
       elixir: "~> 1.4",
       description: "An implementation of the W3C XML Signature standard in Elixir",
       package: [
@@ -25,9 +25,9 @@ defmodule SignXML.Mixfile do
 
   defp deps do
     [
-      {:libxml, "~> 1.0"},
-      {:certifi, "~> 2.0"},
-      {:ex_doc, "~> 0.18.1", only: :dev, runtime: false}
+      {:libxml, "~> 1.1"},
+      {:certifi, "~> 2.3"},
+      {:ex_doc, "~> 0.18.3", only: :dev, runtime: false}
     ]
   end
 end
